@@ -9,7 +9,8 @@
     },
     { "name"     : "shrink",
       "_comment" : "change horizontal vof down to 90 in steps of 5, keep vertical vof",
-      "action"   : "change_hfov",
+      "action"   : "set_vfov",
+      "keep_ratio" : false,
       "range"    : [90, 5]
     },
     { "name"     : "rotate",

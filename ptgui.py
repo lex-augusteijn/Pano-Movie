@@ -84,8 +84,13 @@ class Ptgui:
         vfov = self.project['project']['panoramaparams']['vfov']
         return (hfov, vfov)
 
-    def set_fov(self, fov):
-        hfov, vfov = fov
+    def set_fov(self, hfov=None, vfov=None, keep_ratio=True):
+        h, v = self.get_fov()
+        if hfov == None and vfov == None: return
+        if hfov == None:
+            hfov = vfov/v*h if keep_ratio else h
+        if vfov == None:
+            vfov = hfov/h*v if keep_ratio else v
         self.project['project']['panoramaparams']['hfov'] = hfov
         self.project['project']['panoramaparams']['vfov'] = vfov
 
@@ -180,8 +185,8 @@ def parse_args():
                     prog='ptgui',
                     description='Transform ptgui project files into animations')
     parser.add_argument('filename')
-    parser.add_argument('--resolution', nargs=2, type=int)
-    parser.add_argument('--transforms', nargs='?')
+    parser.add_argument('--resolution', nargs=2, type=int, metavar='res', help='horizontal and vertical resolution')
+    parser.add_argument('--transforms', nargs=1, metavar='transforms.json', help='json file containing transforms')
     args = parser.parse_args()
 
     if args.resolution != None and len(args.resolution)==2:
@@ -194,20 +199,13 @@ def exec_transform (ptgui, t):
     if t["action"] == "set_vfov": # change vertical field-of-view, maintain aspect ratio
         hfov, vfov = ptgui.get_fov()
         r = make_range (vfov, t["range"][0], t["range"][1])
-        do_transforms(ptgui, t["name"], r, lambda p, v : p.set_fov((v*hfov/vfov, v)))
+        keep_ratio = True if not ('keep_ratio' in t.keys()) else t['keep_ratio']
+        do_transforms(ptgui, t["name"], r, lambda p, v : p.set_fov(vfov=v, keep_ratio=keep_ratio))
     elif t["action"] == "set_hfov": # change horizontal field-of-view, maintain aspect ratio
         hfov, vfov = ptgui.get_fov()
         r = make_range (hfov, t["range"][0], t["range"][1])
-        print (hfov, t["range"][0], t["range"][1])
-        do_transforms(ptgui, t["name"], r, lambda p, h : p.set_fov((h, h*vfov/hfov)))
-    elif t["action"] == "change_vfov": # change vertical field-of-view, maintain horizontal field-of-view
-        hfov, vfov = ptgui.get_fov()
-        r = make_range (vfov, t["range"][0], t["range"][1])
-        do_transforms(ptgui, t["name"], r, lambda p, h : p.set_fov((hfov, v)))
-    elif t["action"] == "change_hfov": # change horizontal field-of-view, maintain vertical field-of-view
-        hfov, vfov = ptgui.get_fov()
-        r = make_range (hfov, t["range"][0], t["range"][1])
-        do_transforms(ptgui, t["name"], r, lambda p, h : p.set_fov((h, vfov)))
+        keep_ratio = True if not ('keep_ratio' in t.keys()) else t['keep_ratio']
+        do_transforms(ptgui, t["name"], r, lambda p, h : p.set_fov(hfov=h, keep_ratio=keep_ratio))
     elif t["action"] == "rotate": # rotate according to yaw-pitch-roll
         q = tuple(t["angle"])
         r = make_range (t["range"][0], t["range"][1], t["range"][2])
@@ -223,7 +221,7 @@ if __name__ == "__main__":
     print(resolution)
     print(args.transforms)
 
-    with open(args.transforms) as json_file:
+    with open(args.transforms[0]) as json_file:
         transforms = json.load(json_file)
 
     ptgui = Ptgui.load(args.filename)

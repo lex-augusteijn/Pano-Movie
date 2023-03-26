@@ -1,0 +1,44 @@
+{
+  "name" : "Van Abbe Museum hall",
+  "_comment" : "Start field of view is 360x135, equirectangular",
+  "transforms" : [
+    { "name"     : "zoom",
+      "_comment" : "change vertical vof down to 90 in steps of 5, keep aspect ratio",
+      "action"   : "set_vfov",
+      "range"    : [90, 5]
+    },
+    { "name"     : "shrink",
+      "_comment" : "change horizontal vof down to 90 in steps of 5, keep vertical vof",
+      "action"   : "change_hfov",
+      "range"    : [90, 5]
+    },
+    { "name"     : "rotate",
+      "_comment" : "rotate 360 degrees horizontally in steps of 10",
+      "action"   : "rotate",
+      "range"    : [0, 360, 10],
+      "angle"    : [10, 0, 0]
+    },
+    { "name"     : "down",
+      "_comment" : "rotate 90 degrees vertically in steps of 10",
+      "action"   : "rotate",
+      "range"    : [0, 90, 10],
+      "angle"    : [0, 10, 0]
+    },
+    { "name"     : "stereographic",
+      "_comment" : "change projection to sterographic",
+      "action"   : "projection",
+      "value"    : "stereographic"
+    },
+    { "name"     : "zoom-out",
+      "_comment" : "zoom out to 310 degress in steps of 10",
+      "action"   : "set_hfov",
+      "range"    : [310, 10]
+    },
+    { "name"     : "turn",
+      "_comment" : "rotate 360 degrees in steps of 10",
+      "action"   : "rotate",
+      "range"    : [0, 360, 10],
+      "angle"    : [0, 0, 10]
+    }
+  ]
+}
